@@ -1,0 +1,26 @@
+<div class="app-root-container">
+  <mat-toolbar color="primary" class="app-toolbar">
+    <div class="logo">
+      <div class="icon">
+        <img src="./icons/nav_icon.png" alt="Logo">
+      </div>
+      <span>Task Manager</span>
+    </div>
+    <span class="spacer"></span>
+    <button mat-icon-button aria-label="Notifications" class="notifcation-icon" >
+      <img src="./icons/notifcation.png" alt="Logo">
+    </button>
+    <button mat-fab extended color="accent" class="user-avatar" disabled>JD</button>
+  </mat-toolbar>
+
+  <mat-sidenav-container class="app-sidenav-container">
+    <mat-sidenav mode="side" opened class="app-sidebar">
+      <app-sidebar></app-sidebar>
+    </mat-sidenav>
+    <mat-sidenav-content class="app-main-content">
+      <main class="content-wrapper">
+        <router-outlet></router-outlet>
+      </main>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>
