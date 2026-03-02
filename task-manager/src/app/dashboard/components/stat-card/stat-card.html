@@ -8,7 +8,11 @@
   <mat-card-content>
     <div class="stat-value">{{ stat().value }}</div>
     <div class="stat-change" [ngClass]="stat().changeType">
-      {{ stat().change }} {{ stat().changeLabel }}
+      @if(stat().change && stat().change !== '0'){
+      {{ stat().change }}
+      }
+      {{ stat().changeLabel }}
+
     </div>
   </mat-card-content>
 </mat-card>
