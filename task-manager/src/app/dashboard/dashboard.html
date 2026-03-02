@@ -1,0 +1,14 @@
+<div class="dashboard-container">
+
+  @if (statistics.value(); as stats) {
+  <div class="stats-grid">
+    @for (stat of stats.data; track stat.id) {
+    <app-stat-card [stat]="stat"></app-stat-card>
+    }
+  </div>
+  }
+  @if (statistics.isLoading()) {
+    <div class="spinner-container">
+      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    </div>
+  }
