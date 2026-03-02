@@ -2,11 +2,11 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StatCard } from './components/stat-card/stat-card';
 import { TaskService } from '../core/services/task';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Spinner } from '../shared/spinner/spinner';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, StatCard,MatProgressSpinnerModule],
+  imports: [CommonModule, StatCard, Spinner],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
