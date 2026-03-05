@@ -6,10 +6,11 @@ import { Spinner } from '../shared/spinner/spinner';
 import { DashboardToolbar } from './components/toolbar/toolbar';
 import { NoData } from '../shared/no-data/no-data';
 import { TaskBoard } from './components/task-board/task-board';
+import { RecentActivity } from './components/recent-activity/recent-activity';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, StatCard, Spinner, NoData, DashboardToolbar, TaskBoard],
+  imports: [CommonModule, StatCard, Spinner, NoData, DashboardToolbar, TaskBoard, RecentActivity],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })

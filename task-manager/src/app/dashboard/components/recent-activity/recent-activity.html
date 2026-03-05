@@ -1,0 +1,24 @@
+<div class="recent-activity-card">
+  <h2 class="section-title">Recent Activity</h2>
+  <mat-list class="activity-list">
+    @for (activity of recentActivities(); track activity.id) {
+    <mat-list-item>
+      <div matListItemAvatar class="avatar-circle">
+        <span>{{activity.assigneeAvatar}}</span>
+      </div>
+      <div matListItemTitle class="activity-title">
+        <span class="assignee-name">{{activity.assigneeName}}</span>
+        <span class="action-text">{{activity.action}}</span>
+        <span class="task-name">"{{activity.title}}"</span>
+      </div>
+      <div matListItemLine class="activity-time">
+        {{activity.timestamp | date:'MMM d, h:mm a'}}
+      </div>
+    </mat-list-item>
+    } @empty {
+    <mat-list-item>
+      <div matListItemTitle>No recent activity</div>
+    </mat-list-item>
+    }
+  </mat-list>
+</div>

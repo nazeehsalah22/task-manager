@@ -18,3 +18,28 @@
     grid-template-columns: 1fr;
   }
 }
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  gap: 16px;
+  align-items: start;
+  min-height: 0;
+
+  @media (max-width: 1400px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.side-panel {
+  position: sticky;
+  top: 16px;
+  height: calc(100vh - 124px);
+}

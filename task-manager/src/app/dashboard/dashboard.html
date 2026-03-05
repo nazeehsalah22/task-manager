@@ -16,10 +16,17 @@
   @if (tasks.isLoading()) {
   <app-spinner />
   } @else if (tasks.value(); as tasksList) {
-  <app-dashboard-toolbar (statusChange)="selectedStatus.set($event)" (priorityChange)="selectedPriority.set($event)"
-    (assigneeChange)="selectedAssignees.set($event)"></app-dashboard-toolbar>
-  <app-task-board [tasks]="tasksList" [selectedStatus]="selectedStatus()" [selectedPriority]="selectedPriority()"
-    [selectedAssignees]="selectedAssignees()"></app-task-board>
+    <div class="dashboard-grid">
+      <div class="main-content">
+        <app-dashboard-toolbar (statusChange)="selectedStatus.set($event)" (priorityChange)="selectedPriority.set($event)"
+          (assigneeChange)="selectedAssignees.set($event)"></app-dashboard-toolbar>
+        <app-task-board [tasks]="tasksList" [selectedStatus]="selectedStatus()" [selectedPriority]="selectedPriority()"
+          [selectedAssignees]="selectedAssignees()"></app-task-board>
+      </div>
+      <div class="side-panel">
+        <app-recent-activity [tasks]="tasksList"></app-recent-activity>
+      </div>
+    </div>
   } @else {
   <no-data />
   }
