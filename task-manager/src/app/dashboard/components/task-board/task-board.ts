@@ -13,6 +13,7 @@ export class TaskBoard {
   tasks = input.required<Task[]>();
   selectedStatus = input<string>('all');
   selectedPriority = input<string>('all');
+  selectedAssignees = input<string[]>([]);
   sortTasks = (tasks: Task[]) => {
     return tasks.sort((a, b) => {
       // Both overdue or both not overdue
@@ -29,7 +30,8 @@ export class TaskBoard {
     this.sortTasks(
       this.tasks()
         .filter((t) => t.status === 'todo')
-        .filter((t) => this.selectedPriority() === 'all' || t.priority === this.selectedPriority()),
+        .filter((t) => this.selectedPriority() === 'all' || t.priority === this.selectedPriority())
+        .filter((t) => this.selectedAssignees().length === 0 || (t.assignee && this.selectedAssignees().includes(t.assignee.id))),
     ),
   );
 
@@ -37,7 +39,8 @@ export class TaskBoard {
     this.sortTasks(
       this.tasks()
         .filter((t) => t.status === 'in_progress')
-        .filter((t) => this.selectedPriority() === 'all' || t.priority === this.selectedPriority()),
+        .filter((t) => this.selectedPriority() === 'all' || t.priority === this.selectedPriority())
+        .filter((t) => this.selectedAssignees().length === 0 || (t.assignee && this.selectedAssignees().includes(t.assignee.id))),
     ),
   );
 
@@ -45,7 +48,8 @@ export class TaskBoard {
     this.sortTasks(
       this.tasks()
         .filter((t) => t.status === 'done')
-        .filter((t) => this.selectedPriority() === 'all' || t.priority === this.selectedPriority()),
+        .filter((t) => this.selectedPriority() === 'all' || t.priority === this.selectedPriority())
+        .filter((t) => this.selectedAssignees().length === 0 || (t.assignee && this.selectedAssignees().includes(t.assignee.id))),
     ),
   );
 }

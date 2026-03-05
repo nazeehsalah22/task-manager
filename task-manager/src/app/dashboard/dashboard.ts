@@ -19,4 +19,5 @@ export class Dashboard {
   tasks = this.taskService.tasksResource;
   selectedStatus = signal<string>('all');
   selectedPriority = signal<string>('all');
+  selectedAssignees = signal<string[]>([]);
 }

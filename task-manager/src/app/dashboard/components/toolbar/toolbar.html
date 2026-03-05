@@ -13,12 +13,62 @@
     <button mat-stroked-button class="priority-btn" [matMenuTriggerFor]="priorityMenu">
       Priority <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
     </button>
-    <mat-menu #priorityMenu="matMenu">
+    <mat-menu #priorityMenu="matMenu" class="assignee-menu">
       <button mat-menu-item (click)="priorityChange.emit('all')">All Priorities</button>
       <button mat-menu-item (click)="priorityChange.emit('high')">High</button>
       <button mat-menu-item (click)="priorityChange.emit('medium')">Medium</button>
       <button mat-menu-item (click)="priorityChange.emit('low')">Low</button>
     </mat-menu>
+    <button mat-stroked-button class="priority-btn" [matMenuTriggerFor]="assigneeMenu">
+      Assignee <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #assigneeMenu="matMenu" class="assignee-menu">
+      <div class="search-container" (click)="$event.stopPropagation()">
+        <mat-form-field appearance="outline" class="search-input">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Search assignee..." [formControl]="assigneeSearchControl">
+          @if (assigneeSearchControl.value) {
+            <button matSuffix mat-icon-button aria-label="Clear" (click)="assigneeSearchControl.setValue(''); $event.stopPropagation()">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </mat-form-field>
+        
+        @if (selectedAssigneesData().length > 0) {
+          <div class="assignee-menu-chips">
+            <mat-chip-set>
+              @for (assignee of selectedAssigneesData(); track assignee.id) {
+                <mat-chip-row (removed)="removeAssignee(assignee.id)">
+                  <div class="chip-content">
+                    <div class="chip-avatar">{{ assignee.avatar }}</div>
+                    <span>{{ assignee.name }}</span>
+                  </div>
+                  <button matChipRemove>
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip-row>
+              }
+            </mat-chip-set>
+          </div>
+        }
+      </div>
+      @if (filteredAssignees().length === 0 && (assigneeSearchControl.value || '').trim() === '') {
+        <div class="empty-search-state">Type a name to search</div>
+      }
+      @for (assignee of filteredAssignees(); track assignee.id) {
+        <button mat-menu-item (click)="toggleAssignee(assignee.id); $event.stopPropagation()"
+                [class.selected]="selectedAssignees().includes(assignee.id)">
+          <div class="assignee-item">
+            <div class="assignee-avatar">{{ assignee.avatar }}</div>
+            <span class="assignee-name">{{ assignee.name }}</span>
+            @if (selectedAssignees().includes(assignee.id)) {
+              <mat-icon class="check-icon" color="primary">check</mat-icon>
+            }
+          </div>
+        </button>
+      }
+    </mat-menu>
+
     <button mat-flat-button color="primary" class="priority-btn" (click)="createTask()">
       <mat-icon>add</mat-icon>
       New Task

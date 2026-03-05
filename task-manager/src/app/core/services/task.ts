@@ -16,6 +16,19 @@ export class TaskService {
     { id: 'user-004', name: 'Emily Davis', avatar: 'ED', email: 'emily.davis@company.com' }
   ];
 
+  // Simulates a backend call to search assignees with network delay
+  async searchAssignees(term: string): Promise<any[]> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const lowerTerm = term.toLowerCase();
+        const results = this.assignees.filter((a) =>
+          a.name.toLowerCase().includes(lowerTerm)
+        );
+        resolve(results);
+      }, 500); // 500ms mock delay
+    });
+  }
+
   // Using the new experimental HttpResource API available in Angular 19+
   tasksResource = httpResource<Task[]>(
     () => `${this.apiUrl}/tasks`,
