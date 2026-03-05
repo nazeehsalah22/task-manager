@@ -1,4 +1,4 @@
-<mat-card class="task-card" appearance="outlined" [ngClass]="'priority-' + task().priority">
+<mat-card class="task-card" appearance="outlined" [ngClass]="['priority-' + task().priority, task().isOverdue ? 'overdue' : '']">
   <mat-card-header>
     <div class="card-header-content">
       <span class="priority-badge" [ngClass]="task().priority">{{ task().priority | uppercase }}</span>
@@ -11,11 +11,11 @@
 
     <div class="task-meta">
       <div class="due-date" [class.overdue]="task().isOverdue">
-        📅
-        <span>
-          @if (task().isOverdue) { Overdue } @else { Due in }
-          {{ task().dueDate | date:'MMM d' }}
-        </span>
+        @if (task().isOverdue) {
+          ⚠️ <span>{{ overdueText() }}</span>
+        } @else {
+          📅 <span>{{ upcomingDueText() }}</span>
+        }
       </div>
       <div class="task-tag">{{ task().tags[0] }}</div>
     </div>

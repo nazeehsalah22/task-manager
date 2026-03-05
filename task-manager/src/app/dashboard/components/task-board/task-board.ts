@@ -11,7 +11,19 @@ import { Task } from '../../../core/models/task.model';
 })
 export class TaskBoard {
   tasks = input.required<Task[]>();
-  todoTasks = computed(() => this.tasks().filter(t => t.status === 'todo'));
-  inProgressTasks = computed(() => this.tasks().filter(t => t.status === 'in_progress'));
-  doneTasks = computed(() => this.tasks().filter(t => t.status === 'done'));
+  sortTasks = (tasks: Task[]) => {
+    return tasks.sort((a, b) => {
+      // Both overdue or both not overdue
+      if (a.isOverdue === b.isOverdue) {
+        // Sort chronologically ascending (oldest/closest due date first)
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      }
+      // Overdue tasks come first
+      return a.isOverdue ? -1 : 1;
+    });
+  };
+
+  todoTasks = computed(() => this.sortTasks(this.tasks().filter(t => t.status === 'todo')));
+  inProgressTasks = computed(() => this.sortTasks(this.tasks().filter(t => t.status === 'in_progress')));
+  doneTasks = computed(() => this.sortTasks(this.tasks().filter(t => t.status === 'done')));
 }
