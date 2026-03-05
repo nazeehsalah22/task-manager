@@ -1,0 +1,49 @@
+.task-board-container {
+  display: flex;
+  gap: 24px;
+  padding-bottom: 16px;
+}
+
+.board-column {
+  flex: 1;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  background: white;
+  border-bottom: 2px solid rgba(224, 224, 224, 1);
+  margin-bottom: 16px;
+
+  .column-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+    letter-spacing: 0.5px;
+  }
+
+  .column-count {
+    border-radius: 12px;
+    padding: 1px 8px 2px;
+    background: rgba(224, 224, 224, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 19px;
+    color: rgba(33, 33, 33, 1);
+  }
+}
+
+.column-content {
+  flex: 1;
+}

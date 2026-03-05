@@ -17,6 +17,7 @@
   <app-spinner />
   } @else if (tasks.value(); as tasksList) {
   <app-dashboard-toolbar></app-dashboard-toolbar>
+  <app-task-board [tasks]="tasksList"></app-task-board>
   } @else {
   <no-data />
   }

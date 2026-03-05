@@ -1,0 +1,42 @@
+<div class="task-board-container">
+  
+  <!-- TO DO Column -->
+  <div class="board-column">
+    <div class="column-header">
+      <span class="column-title">TO DO</span>
+      <span class="column-count">{{ todoTasks().length }}</span>
+    </div>
+    <div class="column-content">
+      @for (task of todoTasks(); track task.id) {
+        <app-task-card [task]="task"></app-task-card>
+      }
+    </div>
+  </div>
+
+  <!-- IN PROGRESS Column -->
+  <div class="board-column">
+    <div class="column-header">
+      <span class="column-title">IN PROGRESS</span>
+      <span class="column-count">{{ inProgressTasks().length }}</span>
+    </div>
+    <div class="column-content">
+      @for (task of inProgressTasks(); track task.id) {
+        <app-task-card [task]="task"></app-task-card>
+      }
+    </div>
+  </div>
+
+  <!-- DONE Column -->
+  <div class="board-column">
+    <div class="column-header">
+      <span class="column-title">DONE</span>
+      <span class="column-count">{{ doneTasks().length }}</span>
+    </div>
+    <div class="column-content">
+      @for (task of doneTasks(); track task.id) {
+        <app-task-card [task]="task"></app-task-card>
+      }
+    </div>
+  </div>
+
+</div>

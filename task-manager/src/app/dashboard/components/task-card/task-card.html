@@ -1,0 +1,30 @@
+<mat-card class="task-card" appearance="outlined" [ngClass]="'priority-' + task().priority">
+  <mat-card-header>
+    <div class="card-header-content">
+      <span class="priority-badge" [ngClass]="task().priority">{{ task().priority | uppercase }}</span>
+      <button mat-icon-button class="more-options-btn"><mat-icon>more_vert</mat-icon></button>
+    </div>
+  </mat-card-header>
+  <mat-card-content>
+    <h3 class="task-title">{{ task().title }}</h3>
+    <p class="task-description">{{ task().description }}</p>
+
+    <div class="task-meta">
+      <div class="due-date" [class.overdue]="task().isOverdue">
+        📅
+        <span>
+          @if (task().isOverdue) { Overdue } @else { Due in }
+          {{ task().dueDate | date:'MMM d' }}
+        </span>
+      </div>
+      <div class="task-tag">{{ task().tags[0] }}</div>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions class="task-footer">
+    <div class="assignee">
+      <span class="avatar">{{ task().assignee.avatar }}</span>
+      <span class="name">{{ task().assignee.name }}</span>
+    </div>
+  </mat-card-actions>
+</mat-card>

@@ -5,10 +5,11 @@ import { TaskService } from '../core/services/task';
 import { Spinner } from '../shared/spinner/spinner';
 import { DashboardToolbar } from './components/toolbar/toolbar';
 import { NoData } from '../shared/no-data/no-data';
+import { TaskBoard } from './components/task-board/task-board';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, StatCard, Spinner, NoData, DashboardToolbar],
+  imports: [CommonModule, StatCard, Spinner, NoData, DashboardToolbar, TaskBoard],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
