@@ -191,3 +191,7 @@
 :host ::ng-deep .mat-mdc-card-actions {
   min-height: auto;
 }
+
+::ng-deep .delete-text {
+  color: #f44336;
+}

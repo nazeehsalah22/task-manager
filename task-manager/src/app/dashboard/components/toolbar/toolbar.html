@@ -19,7 +19,7 @@
       <button mat-menu-item (click)="priorityChange.emit('medium')">Medium</button>
       <button mat-menu-item (click)="priorityChange.emit('low')">Low</button>
     </mat-menu>
-    <button mat-flat-button color="primary" class="priority-btn">
+    <button mat-flat-button color="primary" class="priority-btn" (click)="createTask()">
       <mat-icon>add</mat-icon>
       New Task
     </button>

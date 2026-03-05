@@ -2,7 +2,19 @@
   <mat-card-header>
     <div class="card-header-content">
       <span class="priority-badge" [ngClass]="task().priority">{{ task().priority | uppercase }}</span>
-      <button mat-icon-button class="more-options-btn"><mat-icon>more_vert</mat-icon></button>
+      <button mat-icon-button class="more-options-btn" [matMenuTriggerFor]="taskMenu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #taskMenu="matMenu">
+        <button mat-menu-item (click)="editTask()">
+          <mat-icon>edit</mat-icon>
+          <span>Edit</span>
+        </button>
+        <button mat-menu-item (click)="deleteTask()">
+          <mat-icon color="warn">delete</mat-icon>
+          <span class="delete-text">Delete</span>
+        </button>
+      </mat-menu>
     </div>
   </mat-card-header>
   <mat-card-content>
