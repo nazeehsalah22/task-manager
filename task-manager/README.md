@@ -26,28 +26,25 @@ The Task Manager Dashboard is a single-page application that enables teams to ma
 
 The app uses **100% Standalone Components** (no NgModules), aligned with modern Angular 17+ best practices. All components are self-contained with their own imports, enabling better tree-shaking and faster compilation.
 
-```
-src/app/
-├── core/                   # Singleton services, models, interceptors
-│   ├── interceptors/       # HTTP interceptors (error handling, mock backend)
-│   ├── models/             # TypeScript interfaces (Task, Statistic)
-│   └── services/           # TaskService, SearchService
-├── dashboard/              # Feature area: main dashboard view
-│   ├── components/
-│   │   ├── stat-card/      # Summary statistic cards
-│   │   ├── task-board/     # Kanban board container
-│   │   ├── task-card/      # Individual task card
-│   │   ├── task-analytics/ # Charts page
-│   │   ├── recent-activity/# Activity feed
-│   │   └── toolbar/        # Search & filter toolbar
-│   └── dashboard.ts        # Root dashboard component
-├── layout/                 # Shell layout (sidebar & router outlet)
-├── shared/                 # Reusable UI components
-│   ├── dialogs/            # TaskFormDialog, ConfirmDialog
-│   ├── spinner/            # Loading indicator
-│   └── no-data/            # Empty state UI
-└── app.routes.ts           # Lazy-loaded route configuration
-```
+- **`core/`** — Singleton services, models, interceptors
+  - `interceptors/` — HTTP interceptors (error handling, mock backend)
+  - `models/` — TypeScript interfaces (`Task`, `Statistic`)
+  - `services/` — `TaskService`, `SearchService`
+- **`dashboard/`** — Main dashboard feature area
+  - `components/`
+    - `stat-card/` — Summary statistic cards
+    - `task-board/` — Kanban board container
+    - `task-card/` — Individual task card
+    - `task-analytics/` — Charts & analytics page
+    - `recent-activity/` — Activity feed
+    - `toolbar/` — Search & filter toolbar
+  - `dashboard.ts` — Root dashboard component
+- **`layout/`** — Shell layout (sidebar & router outlet)
+- **`shared/`** — Reusable UI components
+  - `dialogs/` — `TaskFormDialog`, `ConfirmDialog`
+  - `spinner/` — Loading indicator
+  - `no-data/` — Empty state UI
+- **`app.routes.ts`** — Lazy-loaded route configuration
 
 ### Lazy Loading
 
