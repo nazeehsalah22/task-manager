@@ -1,6 +1,6 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { form, required, minLength, maxLength, FormField, FormRoot } from '@angular/forms/signals';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -8,76 +8,72 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
-import { Task } from '../../../core/models/task.model';
+import { TaskFormModel, TaskDialogData } from '../../../core/models/task-form.model';
 import { TaskService } from '../../../core/services/task';
-
-export interface TaskDialogData {
-  task?: Task; // If provided, it's Edit mode
-}
 
 @Component({
   selector: 'app-task-form-dialog',
-  standalone: true,
   imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    MatDialogModule, 
-    MatFormFieldModule, 
-    MatInputModule, 
-    MatSelectModule, 
+    CommonModule,
+    FormField,
+    FormRoot,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
     MatDatepickerModule,
     MatNativeDateModule,
     MatButtonModule
   ],
   templateUrl: './task-form-dialog.html',
   styleUrl: './task-form-dialog.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskFormDialog {
-  taskForm: FormGroup;
-  isEditMode: boolean;
+  private readonly dialogRef = inject(MatDialogRef<TaskFormDialog>);
+  private readonly taskService = inject(TaskService);
+  protected readonly data = inject<TaskDialogData>(MAT_DIALOG_DATA);
+  readonly isEditMode = signal(!!this.data?.task);
+  readonly assignees = signal(this.taskService.assignees);
+  readonly taskModel = signal<TaskFormModel>({
+    title: this.data?.task?.title ?? '',
+    description: this.data?.task?.description ?? '',
+    status: this.data?.task?.status ?? 'todo',
+    priority: this.data?.task?.priority ?? 'medium',
+    dueDate: this.data?.task?.dueDate ? new Date(this.data.task.dueDate) : new Date(),
+    assigneeId: this.data?.task?.assignee?.id ?? '',
+  });
 
-  assignees: any[];
+  readonly taskForm = form(
+    this.taskModel,
+    (schema) => {
+      required(schema.title, { message: 'Title is required' });
+      minLength(schema.title, 3, { message: 'Title must be at least 3 characters' });
+      maxLength(schema.title, 100, { message: 'Title cannot exceed 100 characters' });
+      required(schema.description, { message: 'Description is required' });
+      maxLength(schema.description, 500, { message: 'Description cannot exceed 500 characters' });
+      required(schema.status, { message: 'Status is required' });
+      required(schema.priority, { message: 'Priority is required' });
+      required(schema.dueDate, { message: 'Due Date is required' });
+      required(schema.assigneeId, { message: 'Assignee is required' });
+    }
+  );
 
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<TaskFormDialog>,
-    private taskService: TaskService,
-    @Inject(MAT_DIALOG_DATA) public data: TaskDialogData
-  ) {
-    this.isEditMode = !!data?.task;
-    this.assignees = this.taskService.assignees;
-
-    this.taskForm = this.fb.group({
-      title: [data?.task?.title || '', Validators.required],
-      description: [data?.task?.description || '', Validators.required],
-      status: [data?.task?.status || 'todo', Validators.required],
-      priority: [data?.task?.priority || 'medium', Validators.required],
-      dueDate: [data?.task?.dueDate ? new Date(data.task.dueDate) : new Date(), Validators.required],
-      assigneeId: [data?.task?.assignee?.id || '', Validators.required],
+  onSubmit(): void {
+    if (this.taskForm().invalid()) return;
+    const formValue = this.taskForm().value();
+    this.dialogRef.close({
+      title: formValue.title,
+      description: formValue.description,
+      status: formValue.status,
+      priority: formValue.priority,
+      dueDate: formValue.dueDate.toISOString().split('T')[0],
+      assignee: this.assignees().find(a => a.id === formValue.assigneeId),
+      tags: this.data?.task?.tags ?? ['General'],
+      isOverdue: false
     });
   }
-
-  onSubmit() {
-    if (this.taskForm.valid) {
-      const formValue = this.taskForm.value;
-      const selectedAssignee = this.assignees.find(a => a.id === formValue.assigneeId);
-      
-      const result: Partial<Task> = {
-        title: formValue.title,
-        description: formValue.description,
-        status: formValue.status,
-        priority: formValue.priority,
-        dueDate: formValue.dueDate.toISOString().split('T')[0],
-        assignee: selectedAssignee,
-        tags: this.data?.task?.tags || ['General'],
-        isOverdue: false
-      };
-      
-      this.dialogRef.close(result);
-    }
-  }
-
-  onCancel() {
+  onCancel(): void {
     this.dialogRef.close();
   }
 }

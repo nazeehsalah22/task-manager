@@ -1,56 +1,79 @@
-<h2 mat-dialog-title>{{ isEditMode ? 'Edit Task' : 'New Task' }}</h2>
+<h2 mat-dialog-title>{{ isEditMode() ? 'Edit Task' : 'New Task' }}</h2>
 
 <mat-dialog-content>
-  <form [formGroup]="taskForm" class="task-form">
-    <mat-form-field appearance="outline" class="full-width">
+  <form [formRoot]="taskForm" class="task-form">
+    <mat-form-field class="full-width">
       <mat-label>Task Title</mat-label>
-      <input matInput formControlName="title" placeholder="Enter task title">
-      <mat-error *ngIf="taskForm.get('title')?.hasError('required')">Title is required</mat-error>
+      <input matInput [formField]="taskForm.title" placeholder="Enter task title">
+      @if (taskForm.title().invalid() && taskForm.title().touched()) {
+      <mat-error>
+          @for (error of taskForm.title().errors(); track error.message) {
+        {{ error.message }}
+        }
+      </mat-error>
+      }
     </mat-form-field>
-
-    <mat-form-field appearance="outline" class="full-width">
+    <mat-form-field class="full-width">
       <mat-label>Description</mat-label>
-      <textarea matInput formControlName="description" rows="3" placeholder="Enter task description"></textarea>
-      <mat-error *ngIf="taskForm.get('description')?.hasError('required')">Description is required</mat-error>
+      <textarea matInput [formField]="taskForm.description" rows="3" placeholder="Enter task description"></textarea>
+      @if (taskForm.description().invalid() && taskForm.description().touched()) {
+      <mat-error>
+          @for (error of taskForm.description().errors(); track error.message) {
+        {{ error.message }}
+        }
+      </mat-error>
+      }
     </mat-form-field>
-
     <div class="row">
-      <mat-form-field appearance="outline">
+      <mat-form-field>
         <mat-label>Status</mat-label>
-        <mat-select formControlName="status">
+        <mat-select [formField]="taskForm.status">
           <mat-option value="todo">To Do</mat-option>
           <mat-option value="in_progress">In Progress</mat-option>
           <mat-option value="done">Done</mat-option>
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field>
         <mat-label>Priority</mat-label>
-        <mat-select formControlName="priority">
+        <mat-select [formField]="taskForm.priority">
           <mat-option value="low">Low</mat-option>
           <mat-option value="medium">Medium</mat-option>
           <mat-option value="high">High</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
-
     <div class="row">
-      <mat-form-field appearance="outline">
+      <mat-form-field>
         <mat-label>Due Date</mat-label>
-        <input matInput [matDatepicker]="picker" formControlName="dueDate">
+        <input matInput [matDatepicker]="picker" [formField]="taskForm.dueDate">
         <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
-        <mat-error *ngIf="taskForm.get('dueDate')?.hasError('required')">Due Date is required</mat-error>
+        @if (taskForm.dueDate().invalid() && taskForm.dueDate().touched()) {
+        <mat-error>
+            @for (error of taskForm.dueDate().errors(); track error.message) {
+          {{ error.message }}
+          }
+        </mat-error>
+        }
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field>
         <mat-label>Assignee</mat-label>
-        <mat-select formControlName="assigneeId">
-          <mat-option *ngFor="let user of assignees" [value]="user.id">
+        <mat-select [formField]="taskForm.assigneeId">
+          @for (user of assignees(); track user.id) {
+          <mat-option [value]="user.id">
             {{ user.name }}
           </mat-option>
+          }
         </mat-select>
-        <mat-error *ngIf="taskForm.get('assigneeId')?.hasError('required')">Assignee is required</mat-error>
+        @if (taskForm.assigneeId().invalid() && taskForm.assigneeId().touched()) {
+        <mat-error>
+            @for (error of taskForm.assigneeId().errors(); track error.message) {
+          {{ error.message }}
+          }
+        </mat-error>
+        }
       </mat-form-field>
     </div>
   </form>
@@ -58,7 +81,7 @@
 
 <mat-dialog-actions>
   <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-flat-button color="primary" [disabled]="taskForm.invalid" (click)="onSubmit()">
-    {{ isEditMode ? 'Save' : 'Create' }}
+  <button mat-flat-button color="primary" [disabled]="taskForm().invalid()" (click)="onSubmit()">
+    {{ isEditMode() ? 'Save' : 'Create' }}
   </button>
 </mat-dialog-actions>

@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormField, FormRoot } from '@angular/forms/signals';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { vi } from 'vitest';
-import { TaskFormDialog, TaskDialogData } from './task-form-dialog';
+import { TaskFormDialog } from './task-form-dialog';
+import { TaskDialogData } from '../../../core/models/task-form.model';
 import { TaskService } from '../../../core/services/task';
 import { By } from '@angular/platform-browser';
 
@@ -20,7 +21,7 @@ describe('TaskFormDialog', () => {
     mockTaskService = { assignees: defaultAssignees };
 
     await TestBed.configureTestingModule({
-      imports: [TaskFormDialog, ReactiveFormsModule],
+      imports: [TaskFormDialog, FormField, FormRoot],
       providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: dialogData },
@@ -46,19 +47,19 @@ describe('TaskFormDialog', () => {
 
     it('should create in Create mode by default', () => {
       expect(component).toBeTruthy();
-      expect(component.isEditMode).toBe(false);
+      expect(component.isEditMode()).toBe(false);
     });
 
     it('should have an invalid form if fields are empty', () => {
       const form = component.taskForm;
-      form.controls['title'].setValue('');
-      form.controls['description'].setValue('');
-      form.controls['assigneeId'].setValue('');
-      expect(form.valid).toBe(false);
+      form.title().value.set('');
+      form.description().value.set('');
+      form.assigneeId().value.set('');
+      expect(form().valid()).toBe(false);
     });
 
     it('should not call close on submit if the form is invalid', () => {
-      component.taskForm.controls['title'].setValue('');
+      component.taskForm.title().value.set('');
       component.onSubmit();
       expect(mockDialogRef.close).not.toHaveBeenCalled();
     });
@@ -75,15 +76,15 @@ describe('TaskFormDialog', () => {
 
     it('should close dialog with partial task result on submit', () => {
       const form = component.taskForm;
-      form.controls['title'].setValue('Test task title');
-      form.controls['description'].setValue('This is a test');
-      form.controls['status'].setValue('in_progress');
-      form.controls['priority'].setValue('high');
+      form.title().value.set('Test task title');
+      form.description().value.set('This is a test');
+      form.status().value.set('in_progress');
+      form.priority().value.set('high');
       const dDate = new Date('2026-05-01');
-      form.controls['dueDate'].setValue(dDate);
-      form.controls['assigneeId'].setValue('1');
+      form.dueDate().value.set(dDate);
+      form.assigneeId().value.set('1');
       
-      expect(form.valid).toBe(true);
+      expect(form().valid()).toBe(true);
 
       component.onSubmit();
 
@@ -123,23 +124,23 @@ describe('TaskFormDialog', () => {
     });
 
     it('should create in Edit mode when task data is provided', () => {
-      expect(component.isEditMode).toBe(true);
+      expect(component.isEditMode()).toBe(true);
       const titleElement = fixture.debugElement.query(By.css('h2')).nativeElement;
       expect(titleElement.textContent).toContain('Edit Task');
     });
 
     it('should populate the form with existing task data', () => {
       const form = component.taskForm;
-      expect(form.controls['title'].value).toBe('Existing Task');
-      expect(form.controls['description'].value).toBe('Existing Description');
-      expect(form.controls['status'].value).toBe('done');
-      expect(form.controls['priority'].value).toBe('low');
-      expect(form.controls['assigneeId'].value).toBe('2');
-      expect(form.controls['dueDate'].value.toISOString()).toContain('2025-01-01');
+      expect(form.title().value()).toBe('Existing Task');
+      expect(form.description().value()).toBe('Existing Description');
+      expect(form.status().value()).toBe('done');
+      expect(form.priority().value()).toBe('low');
+      expect(form.assigneeId().value()).toBe('2');
+      expect(form.dueDate().value().toISOString()).toContain('2025-01-01');
     });
 
     it('should preserve existing tags on submit', () => {
-      component.taskForm.controls['title'].setValue('Updated Title');
+      component.taskForm.title().value.set('Updated Title');
       component.onSubmit();
 
       expect(mockDialogRef.close).toHaveBeenCalledWith(expect.objectContaining({
@@ -165,7 +166,7 @@ describe('TaskFormDialog', () => {
     });
 
     it('should disable submit button when form is invalid', () => {
-      component.taskForm.controls['title'].setValue('');
+      component.taskForm.title().value.set('');
       fixture.detectChanges();
       const submitBtn = fixture.debugElement.query(By.css('button[color="primary"]')).nativeElement;
       expect(submitBtn.disabled).toBe(true);
@@ -174,21 +175,17 @@ describe('TaskFormDialog', () => {
     it('should show error messages when fields are touched and empty', () => {
       const form = component.taskForm;
       
-      const titleCtrl = form.controls['title'];
-      titleCtrl.setValue('');
-      titleCtrl.markAsTouched();
+      form.title().value.set('');
+      form.title().markAsTouched();
 
-      const descCtrl = form.controls['description'];
-      descCtrl.setValue('');
-      descCtrl.markAsTouched();
+      form.description().value.set('');
+      form.description().markAsTouched();
 
-      const dateCtrl = form.controls['dueDate'];
-      dateCtrl.setValue(null);
-      dateCtrl.markAsTouched();
+      form.dueDate().value.set(null as any);
+      form.dueDate().markAsTouched();
 
-      const assigneeCtrl = form.controls['assigneeId'];
-      assigneeCtrl.setValue('');
-      assigneeCtrl.markAsTouched();
+      form.assigneeId().value.set('');
+      form.assigneeId().markAsTouched();
 
       fixture.detectChanges();
 
@@ -203,28 +200,28 @@ describe('TaskFormDialog', () => {
     });
 
     it('should display "Create" on the submit button in Create mode', () => {
-      component.isEditMode = false;
+      component.isEditMode.set(false);
       fixture.detectChanges();
       const submitBtn = fixture.debugElement.query(By.css('button[color="primary"]')).nativeElement;
       expect(submitBtn.textContent.trim()).toBe('Create');
     });
 
     it('should display "Save" on the submit button in Edit mode', () => {
-      component.isEditMode = true;
+      component.isEditMode.set(true);
       fixture.detectChanges();
       const submitBtn = fixture.debugElement.query(By.css('button[color="primary"]')).nativeElement;
       expect(submitBtn.textContent.trim()).toBe('Save');
     });
 
     it('should display "New Task" as the title in Create mode', () => {
-      component.isEditMode = false;
+      component.isEditMode.set(false);
       fixture.detectChanges();
       const titleElement = fixture.debugElement.query(By.css('h2')).nativeElement;
       expect(titleElement.textContent.trim()).toBe('New Task');
     });
 
     it('should display "Edit Task" as the title in Edit mode', () => {
-      component.isEditMode = true;
+      component.isEditMode.set(true);
       fixture.detectChanges();
       const titleElement = fixture.debugElement.query(By.css('h2')).nativeElement;
       expect(titleElement.textContent.trim()).toBe('Edit Task');
@@ -232,16 +229,16 @@ describe('TaskFormDialog', () => {
 
     it('should enable submit button when form becomes valid', () => {
       // First, it is invalid because it's empty
-      component.taskForm.controls['title'].setValue('');
+      component.taskForm.title().value.set('');
       fixture.detectChanges();
       let submitBtn = fixture.debugElement.query(By.css('button[color="primary"]')).nativeElement;
       expect(submitBtn.disabled).toBe(true);
 
       // Make valid
-      component.taskForm.controls['title'].setValue('Test test title');
-      component.taskForm.controls['description'].setValue('Desc');
-      component.taskForm.controls['dueDate'].setValue(new Date());
-      component.taskForm.controls['assigneeId'].setValue('1');
+      component.taskForm.title().value.set('Test test title');
+      component.taskForm.description().value.set('Desc');
+      component.taskForm.dueDate().value.set(new Date());
+      component.taskForm.assigneeId().value.set('1');
       fixture.detectChanges();
 
       submitBtn = fixture.debugElement.query(By.css('button[color="primary"]')).nativeElement;
@@ -250,7 +247,9 @@ describe('TaskFormDialog', () => {
 
     it('should render assignee options from *ngFor', async () => {
       // Need to click/open the mat-select to query its options
-      const selectElement = fixture.debugElement.query(By.css('mat-select[formControlName="assigneeId"]')).nativeElement;
+      // Assignee is the third mat-select in the dialog
+      const selects = fixture.debugElement.queryAll(By.css('mat-select'));
+      const selectElement = selects[2].nativeElement;
       selectElement.click();
       fixture.detectChanges();
       await fixture.whenStable();
@@ -264,23 +263,6 @@ describe('TaskFormDialog', () => {
       expect(optionTexts).toContain('Alice');
       expect(optionTexts).toContain('Bob');
     });
-    it('should correctly handle null form controls to cover HTML optional chaining branches', () => {
-      // The HTML has `taskForm.get('title')?.hasError('required')`
-      // We need to force `taskForm.get(...)` to return null to hit the false branch of the optional chaining `?.`
-      component.taskForm.removeControl('title');
-      component.taskForm.removeControl('description');
-      component.taskForm.removeControl('dueDate');
-      component.taskForm.removeControl('assigneeId');
-      
-      // Run change detection
-      fixture.detectChanges();
-      
-      // Query error messages to ensure they don't crash and don't show
-      const errorMessages = fixture.debugElement.queryAll(By.css('mat-error'));
-      // Expect no errors because the controls are completely gone, so hasError is not evaluated to true
-      expect(errorMessages.length).toBe(0);
-    });
-
     it('should trigger onCancel function when cancel button is clicked in the DOM', () => {
       vi.spyOn(component, 'onCancel');
       const cancelButton = fixture.debugElement.query(By.css('button[mat-button]')).nativeElement;
@@ -290,10 +272,10 @@ describe('TaskFormDialog', () => {
 
     it('should trigger onSubmit function when submit button is clicked in the DOM', () => {
       // Must make form valid first so the button is not disabled
-      component.taskForm.controls['title'].setValue('Test test title');
-      component.taskForm.controls['description'].setValue('Desc');
-      component.taskForm.controls['dueDate'].setValue(new Date());
-      component.taskForm.controls['assigneeId'].setValue('1');
+      component.taskForm.title().value.set('Test test title');
+      component.taskForm.description().value.set('Desc');
+      component.taskForm.dueDate().value.set(new Date());
+      component.taskForm.assigneeId().value.set('1');
       fixture.detectChanges();
 
       vi.spyOn(component, 'onSubmit');

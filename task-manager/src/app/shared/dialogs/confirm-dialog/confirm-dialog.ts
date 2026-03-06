@@ -6,7 +6,6 @@ import { ConfirmDialogData } from '../../../core/models/dialog.model';
 
 @Component({
   selector: 'app-confirm-dialog',
-  standalone: true,
   imports: [CommonModule, MatDialogModule, MatButtonModule],
   templateUrl: './confirm-dialog.html'
 })
