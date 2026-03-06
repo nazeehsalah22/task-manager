@@ -1,8 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TaskCard } from './task-card';
-import { TaskService } from '../../../core/services/task';
-import { MatDialog } from '@angular/material/dialog';
-import { of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { vi } from 'vitest';
 import { Task } from '../../../core/models/task.model';
@@ -10,8 +7,6 @@ import { Task } from '../../../core/models/task.model';
 describe('TaskCard', () => {
   let component: TaskCard;
   let fixture: ComponentFixture<TaskCard>;
-  let mockTaskService: any;
-  let mockDialog: any;
 
   const getMockTask = (overdue = false, daysDiff = 0): Task => {
     const due = new Date();
@@ -33,22 +28,9 @@ describe('TaskCard', () => {
   };
 
   beforeEach(async () => {
-    mockTaskService = {
-      updateTask: vi.fn().mockResolvedValue({}),
-      deleteTask: vi.fn().mockResolvedValue({})
-    };
-    mockDialog = {
-      open: vi.fn().mockReturnValue({
-        afterClosed: () => of(null)
-      })
-    };
-
     await TestBed.configureTestingModule({
       imports: [TaskCard],
-    })
-    .overrideProvider(TaskService, { useValue: mockTaskService })
-    .overrideProvider(MatDialog, { useValue: mockDialog })
-    .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TaskCard);
     component = fixture.componentInstance;
@@ -60,37 +42,17 @@ describe('TaskCard', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('Dialog Operations', () => {
-    it('should open TaskFormDialog and call updateTask on result', async () => {
-      const editResult = { title: 'Updated' };
-      mockDialog.open.mockReturnValue({
-        afterClosed: () => of(editResult)
-      });
-
+  describe('Output Events', () => {
+    it('should emit edit event when editTask is called', () => {
+      const emitSpy = vi.spyOn(component.edit, 'emit');
       component.editTask();
-      expect(mockDialog.open).toHaveBeenCalled();
-      expect(mockTaskService.updateTask).toHaveBeenCalledWith('1', editResult);
+      expect(emitSpy).toHaveBeenCalledWith(component.task());
     });
 
-    it('should open ConfirmDialog and call deleteTask on result', async () => {
-      mockDialog.open.mockReturnValue({
-        afterClosed: () => of(true)
-      });
-
+    it('should emit delete event when deleteTask is called', () => {
+      const emitSpy = vi.spyOn(component.delete, 'emit');
       component.deleteTask();
-      expect(mockDialog.open).toHaveBeenCalled();
-      expect(mockTaskService.deleteTask).toHaveBeenCalledWith('1');
-    });
-
-    it('should not call services if dialog is cancelled', () => {
-      mockDialog.open.mockReturnValue({
-        afterClosed: () => of(null)
-      });
-
-      component.editTask();
-      component.deleteTask();
-      expect(mockTaskService.updateTask).not.toHaveBeenCalled();
-      expect(mockTaskService.deleteTask).not.toHaveBeenCalled();
+      expect(emitSpy).toHaveBeenCalledWith(component.task());
     });
   });
 

@@ -1,9 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Dashboard } from './dashboard';
 import { TaskService } from '../core/services/task';
+import { SearchService } from '../core/services/search';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { DashboardToolbar } from './components/toolbar/toolbar';
+import { TaskBoard } from './components/task-board/task-board';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -13,6 +17,9 @@ describe('Dashboard', () => {
   let mockTaskService: any;
   let mockStatsResource: any;
   let mockTasksResource: any;
+  let mockDialog: any;
+  let mockSnackBar: any;
+  let mockSearchService: any;
 
   const getMockTask = (id: string) => ({
     id,
@@ -27,7 +34,7 @@ describe('Dashboard', () => {
   });
 
   beforeEach(async () => {
-    const statsValueSignal = signal({ data: [{ id: 1, title: 'Tasks', value: 10, icon: 'task' }] });
+    const statsValueSignal = signal([{ id: 1, title: 'Tasks', value: 10, icon: 'task' }]);
     const statsIsLoadingSignal = signal(false);
     mockStatsResource = statsValueSignal as any;
     mockStatsResource.value = statsValueSignal;
@@ -44,16 +51,24 @@ describe('Dashboard', () => {
     mockTaskService = {
       statisticsResource: mockStatsResource,
       tasksResource: mockTasksResource,
-      searchAssignees: vi.fn().mockReturnValue(of([])),
-      searchTasks: vi.fn().mockReturnValue(of([]))
+      updateTask: vi.fn().mockResolvedValue({}),
+      deleteTask: vi.fn().mockResolvedValue({})
     };
+
+    mockDialog = { open: vi.fn().mockReturnValue({ afterClosed: () => of(null) }) };
+    mockSnackBar = { open: vi.fn() };
+    mockSearchService = { searchTerm: signal('') };
 
     await TestBed.configureTestingModule({
       imports: [Dashboard],
       providers: [
-        { provide: TaskService, useValue: mockTaskService }
+        { provide: TaskService, useValue: mockTaskService },
+        { provide: SearchService, useValue: mockSearchService }
       ]
-    }).compileComponents();
+    })
+    .overrideProvider(MatDialog, { useValue: mockDialog })
+    .overrideProvider(MatSnackBar, { useValue: mockSnackBar })
+    .compileComponents();
 
     fixture = TestBed.createComponent(Dashboard);
     component = fixture.componentInstance;
@@ -120,6 +135,32 @@ describe('Dashboard', () => {
       const toolbar = fixture.debugElement.query(By.directive(DashboardToolbar));
       toolbar.triggerEventHandler('assigneeChange', ['u1', 'u2']);
       expect(component.selectedAssignees()).toEqual(['u1', 'u2']);
+    });
+  });
+
+  describe('Task events', () => {
+    it('should edit task via TaskBoard edit event', () => {
+      mockDialog.open.mockReturnValue({ afterClosed: () => of({ title: 'New' }) });
+      const taskBoard = fixture.debugElement.query(By.directive(TaskBoard));
+      taskBoard.triggerEventHandler('edit', getMockTask('1'));
+      expect(mockDialog.open).toHaveBeenCalled();
+      expect(mockTaskService.updateTask).toHaveBeenCalledWith('1', { title: 'New' });
+    });
+
+    it('should delete task via TaskBoard delete event', () => {
+      mockDialog.open.mockReturnValue({ afterClosed: () => of(true) });
+      const taskBoard = fixture.debugElement.query(By.directive(TaskBoard));
+      taskBoard.triggerEventHandler('delete', getMockTask('1'));
+      expect(mockDialog.open).toHaveBeenCalled();
+      expect(mockTaskService.deleteTask).toHaveBeenCalledWith('1');
+    });
+
+    it('should update task status via TaskBoard taskMoved event', async () => {
+      const taskBoard = fixture.debugElement.query(By.directive(TaskBoard));
+      taskBoard.triggerEventHandler('taskMoved', { task: getMockTask('1'), newStatus: 'done' });
+      expect(mockTaskService.updateTask).toHaveBeenCalledWith('1', { status: 'done' });
+      await vi.waitUntil(() => mockSnackBar.open.mock.calls.length > 0);
+      expect(mockSnackBar.open).toHaveBeenCalledWith('Task moved to DONE', 'Close', { duration: 2000 });
     });
   });
 });

@@ -4,7 +4,7 @@
   }
   @else if (statistics.value(); as stats) {
   <div class="stats-grid">
-    @for (stat of stats.data; track stat.id) {
+    @for (stat of stats; track stat.id) {
     <app-stat-card [stat]="stat"></app-stat-card>
     }
   </div>
@@ -21,7 +21,8 @@
         <app-dashboard-toolbar (statusChange)="selectedStatus.set($event)" (priorityChange)="selectedPriority.set($event)"
           (assigneeChange)="selectedAssignees.set($event)"></app-dashboard-toolbar>
         <app-task-board [tasks]="tasksList" [selectedStatus]="selectedStatus()" [selectedPriority]="selectedPriority()"
-          [selectedAssignees]="selectedAssignees()"></app-task-board>
+          [selectedAssignees]="selectedAssignees()" [searchTerm]="searchService.searchTerm()"
+          (taskMoved)="onTaskMoved($event)" (edit)="onEditTask($event)" (delete)="onDeleteTask($event)"></app-task-board>
       </div>
       <div class="side-panel">
         <app-recent-activity [tasks]="tasksList"></app-recent-activity>

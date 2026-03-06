@@ -1,13 +1,23 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TaskService } from './task';
 import { vi } from 'vitest';
+import { environment } from '../../../environments/environment';
 
 describe('TaskService', () => {
   let service: TaskService;
+  let httpTesting: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
+    });
     service = TestBed.inject(TaskService);
+    httpTesting = TestBed.inject(HttpTestingController);
     
     // Mock the reload method on tasksResource
     service.tasksResource = {
@@ -16,6 +26,14 @@ describe('TaskService', () => {
   });
 
   afterEach(() => {
+    // Flush the initial requests made by the httpResource signals
+    const taskReqs = httpTesting.match(`${environment.apiUrl}/tasks`);
+    taskReqs.forEach(req => req.flush([]));
+    
+    const statReqs = httpTesting.match(`${environment.apiUrl}/statistics`);
+    statReqs.forEach(req => req.flush({}));
+    
+    httpTesting.verify();
     vi.restoreAllMocks();
   });
 
@@ -43,63 +61,38 @@ describe('TaskService', () => {
   });
 
   describe('CRUD operations', () => {
-    const mockTasksData = {
-      meta: { totalCount: 1 },
-      data: [
-        { id: 'task-1', title: 'Task 1' }
-      ]
-    };
-
-    beforeEach(() => {
-      vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: any, init?: any) => {
-        if (init?.method === 'PUT') {
-          return { ok: true } as Response;
-        }
-        return {
-          json: async () => JSON.parse(JSON.stringify(mockTasksData))
-        } as Response;
-      });
-    });
-
     it('should create a new task', async () => {
-      await service.createTask({ title: 'New Task', description: 'Test' });
+      const promise = service.createTask({ title: 'New Task', description: 'Test' });
       
-      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
-      expect(globalThis.fetch).toHaveBeenNthCalledWith(1, 'http://localhost:3000/tasks');
-      expect(globalThis.fetch).toHaveBeenNthCalledWith(2, 'http://localhost:3000/tasks', expect.objectContaining({
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: expect.stringContaining('"title":"New Task"')
-      }));
+      const req = httpTesting.expectOne(`${environment.apiUrl}/tasks`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body.title).toBe('New Task');
+      req.flush({});
+       
+      await promise;
       expect(service.tasksResource.reload).toHaveBeenCalled();
     });
 
     it('should update an existing task', async () => {
-      await service.updateTask('task-1', { title: 'Updated Title' });
+      const promise = service.updateTask('task-1', { title: 'Updated Title' });
 
-      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
-      expect(globalThis.fetch).toHaveBeenNthCalledWith(2, 'http://localhost:3000/tasks', expect.objectContaining({
-        method: 'PUT',
-        body: expect.stringContaining('"title":"Updated Title"')
-      }));
+      const req = httpTesting.expectOne(`${environment.apiUrl}/tasks/task-1`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body.title).toBe('Updated Title');
+      req.flush({});
+
+      await promise;
       expect(service.tasksResource.reload).toHaveBeenCalled();
     });
 
-    it('should not update if task is not found', async () => {
-      await service.updateTask('non-existent-task', { title: 'Updated Title' });
-
-      expect(globalThis.fetch).toHaveBeenCalledTimes(1); // Only the initial GET call
-      expect(service.tasksResource.reload).not.toHaveBeenCalled();
-    });
-
     it('should delete an existing task', async () => {
-      await service.deleteTask('task-1');
+      const promise = service.deleteTask('task-1');
 
-      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
-      expect(globalThis.fetch).toHaveBeenNthCalledWith(2, 'http://localhost:3000/tasks', expect.objectContaining({
-        method: 'PUT',
-        body: expect.stringContaining('"data":[]') // Should be empty after filtering out task-1
-      }));
+      const req = httpTesting.expectOne(`${environment.apiUrl}/tasks/task-1`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush({});
+
+      await promise;
       expect(service.tasksResource.reload).toHaveBeenCalled();
     });
   });

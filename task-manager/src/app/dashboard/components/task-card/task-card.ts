@@ -1,54 +1,30 @@
-import { Component, input, computed, inject } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, input, output, computed, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Task } from '../../../core/models/task.model';
-import { TaskService } from '../../../core/services/task';
-import { TaskFormDialog } from '../../../shared/dialogs/task-form-dialog/task-form-dialog';
-import { ConfirmDialog } from '../../../shared/dialogs/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-task-card',
-  imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule, MatDividerModule, MatMenuModule, MatDialogModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule, MatDividerModule, MatMenuModule],
   templateUrl: './task-card.html',
   styleUrl: './task-card.scss',
 })
 export class TaskCard {
   task = input.required<Task>();
-  private dialog = inject(MatDialog);
-  private taskService = inject(TaskService);
+  edit = output<Task>();
+  delete = output<Task>();
 
   editTask() {
-    const dialogRef = this.dialog.open(TaskFormDialog, {
-      data: { task: this.task() },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.taskService.updateTask(this.task().id, result);
-      }
-    });
+    this.edit.emit(this.task());
   }
 
   deleteTask() {
-    const dialogRef = this.dialog.open(ConfirmDialog, {
-      data: {
-        title: 'Delete Task',
-        message: `Are you sure you want to delete "${this.task().title}"?`,
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.taskService.deleteTask(this.task().id);
-      }
-    });
+    this.delete.emit(this.task());
   }
 
   overdueText = computed(() => {

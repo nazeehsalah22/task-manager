@@ -1,15 +1,13 @@
-import { Component, input, computed, inject } from '@angular/core';
+import { Component, input, output, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { TaskCard } from '../task-card/task-card';
 import { Task } from '../../../core/models/task.model';
-import { TaskService } from '../../../core/services/task';
-import { SearchService } from '../../../core/services/search';
 
 @Component({
   selector: 'app-task-board',
-  imports: [CommonModule, TaskCard, DragDropModule, MatSnackBarModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, TaskCard, DragDropModule],
   templateUrl: './task-board.html',
   styleUrl: './task-board.scss',
 })
@@ -18,9 +16,11 @@ export class TaskBoard {
   selectedStatus = input<string>('all');
   selectedPriority = input<string>('all');
   selectedAssignees = input<string[]>([]);
-  private taskService = inject(TaskService);
-  private snackBar = inject(MatSnackBar);
-  private searchService = inject(SearchService);
+  searchTerm = input<string>('');
+
+  taskMoved = output<{task: Task, newStatus: string}>();
+  edit = output<Task>();
+  delete = output<Task>();
   sortTasks = (tasks: Task[]) => {
     return tasks.sort((a, b) => {
       // Both overdue or both not overdue
@@ -43,12 +43,7 @@ export class TaskBoard {
       const targetArray = event.container.data;
       targetArray.splice(event.currentIndex, 0, event.previousContainer.data.splice(event.previousIndex, 1)[0]);
       
-      this.taskService.updateTask(task.id, { status: newStatus as Task['status'] }).then(() => {
-        this.snackBar.open(`Task moved to ${newStatus.replace('_', ' ').toUpperCase()}`, 'Close', { duration: 2000 });
-      }).catch(err => {
-        console.error('Failed to move task', err);
-        this.snackBar.open('Failed to move task', 'Close', { duration: 3000, panelClass: 'error-snackbar' });
-      });
+      this.taskMoved.emit({ task, newStatus });
     } else {
        // Just visual reorder in same array
        moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
@@ -56,7 +51,7 @@ export class TaskBoard {
   }
 
   todoTasks = computed(() => {
-    const term = this.searchService.searchTerm().toLowerCase();
+    const term = this.searchTerm().toLowerCase();
     return this.sortTasks(
       this.tasks()
         .filter((t) => t.status === 'todo')
@@ -67,7 +62,7 @@ export class TaskBoard {
   });
 
   inProgressTasks = computed(() => {
-    const term = this.searchService.searchTerm().toLowerCase();
+    const term = this.searchTerm().toLowerCase();
     return this.sortTasks(
       this.tasks()
         .filter((t) => t.status === 'in_progress')
@@ -78,7 +73,7 @@ export class TaskBoard {
   });
 
   doneTasks = computed(() => {
-    const term = this.searchService.searchTerm().toLowerCase();
+    const term = this.searchTerm().toLowerCase();
     return this.sortTasks(
       this.tasks()
         .filter((t) => t.status === 'done')

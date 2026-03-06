@@ -150,7 +150,7 @@ describe('TaskFormDialog', () => {
         priority: 'low',
         assignee: defaultAssignees[1],
         tags: ['Frontend', 'Bug'],
-        isOverdue: false 
+        isOverdue: true 
       }));
     });
   });

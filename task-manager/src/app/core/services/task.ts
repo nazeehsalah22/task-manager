@@ -1,13 +1,16 @@
-import { Injectable } from '@angular/core';
-import { httpResource, HttpResponse } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { httpResource, HttpResponse, HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { Task } from '../models/task.model';
-import { Statistic, StatisticsResponse } from '../models/statistic.model';
+import { Statistic } from '../models/statistic.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
-  private apiUrl = 'http://localhost:3000';
+  private apiUrl = environment.apiUrl;
+  private http = inject(HttpClient);
   // Mock assignees for selection
   assignees = [
     { id: 'user-001', name: 'John Doe', avatar: 'JD', email: 'john.doe@company.com' },
@@ -31,20 +34,12 @@ export class TaskService {
 
   // Using the new experimental HttpResource API available in Angular 19+
   tasksResource = httpResource<Task[]>(
-    () => `${this.apiUrl}/tasks`,
-    {
-      parse: (response: any) => {
-        return response.data;
-      }
-    }
+    () => `${this.apiUrl}/tasks`
   );
-  statisticsResource = httpResource<StatisticsResponse>(
+  statisticsResource = httpResource<Statistic[]>(
     () => `${this.apiUrl}/statistics`
   );
   async createTask(task: Partial<Task>): Promise<void> {
-    const response = await fetch(`${this.apiUrl}/tasks`);
-    const tasksData = await response.json();
-    
     const newTask = {
       ...task,
       id: `task-${Date.now()}`,
@@ -52,55 +47,20 @@ export class TaskService {
       updatedAt: new Date().toISOString()
     };
     
-    tasksData.data.push(newTask);
-    tasksData.meta.totalCount = tasksData.data.length;
-    tasksData.meta.lastUpdated = new Date().toISOString();
-
-    await fetch(`${this.apiUrl}/tasks`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(tasksData)
-    });
-    
+    await firstValueFrom(this.http.post(`${this.apiUrl}/tasks`, newTask));
     this.tasksResource.reload();
   }
 
   async updateTask(id: string, updates: Partial<Task>): Promise<void> {
-    const response = await fetch(`${this.apiUrl}/tasks`);
-    const tasksData = await response.json();
-    
-    const index = tasksData.data.findIndex((t: Task) => t.id === id);
-    if (index !== -1) {
-      tasksData.data[index] = { 
-        ...tasksData.data[index], 
-        ...updates, 
-        updatedAt: new Date().toISOString() 
-      };
-      
-      await fetch(`${this.apiUrl}/tasks`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(tasksData)
-      });
-      
-      this.tasksResource.reload();
-    }
+    await firstValueFrom(this.http.patch(`${this.apiUrl}/tasks/${id}`, {
+      ...updates,
+      updatedAt: new Date().toISOString()
+    }));
+    this.tasksResource.reload();
   }
 
   async deleteTask(id: string): Promise<void> {
-    const response = await fetch(`${this.apiUrl}/tasks`);
-    const tasksData = await response.json();
-    
-    tasksData.data = tasksData.data.filter((t: Task) => t.id !== id);
-    tasksData.meta.totalCount = tasksData.data.length;
-    tasksData.meta.lastUpdated = new Date().toISOString();
-    
-    await fetch(`${this.apiUrl}/tasks`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(tasksData)
-    });
-    
+    await firstValueFrom(this.http.delete(`${this.apiUrl}/tasks/${id}`));
     this.tasksResource.reload();
   }
 }

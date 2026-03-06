@@ -62,6 +62,11 @@ export class TaskFormDialog {
   onSubmit(): void {
     if (this.taskForm().invalid()) return;
     const formValue = this.taskForm().value();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dueDate = new Date(formValue.dueDate);
+    dueDate.setHours(0, 0, 0, 0);
+
     this.dialogRef.close({
       title: formValue.title,
       description: formValue.description,
@@ -70,7 +75,7 @@ export class TaskFormDialog {
       dueDate: formValue.dueDate.toISOString().split('T')[0],
       assignee: this.assignees().find(a => a.id === formValue.assigneeId),
       tags: this.data?.task?.tags ?? ['General'],
-      isOverdue: false
+      isOverdue: dueDate < today
     });
   }
   onCancel(): void {
