@@ -218,7 +218,6 @@ Measured using **Chrome Lighthouse** on the deployed GitHub Pages build:
 - **UI Library** — Angular Material 21
 - **Charts** — Chart.js 4 + ng2-charts 10
 - **Testing** — Vitest 4
-- **Code Style** — Prettier
 - **Mock API** — json-server 0.17 / LocalStorage interceptor
 - **CI/CD** — GitHub Actions
 - **Hosting** — GitHub Pages
