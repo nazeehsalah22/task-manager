@@ -46,7 +46,9 @@ jobs:
       
     - name: Build Application for GitHub Pages
       # The base-href must match the repository name for GitHub Pages routing resolving correctly
-      run: npm run build -- --base-href /task-manager/
+      run: |
+        npm run build -- --base-href /task-manager/
+        cp dist/task-manager/browser/index.html dist/task-manager/browser/404.html
       
     - name: Setup Pages
       uses: actions/configure-pages@v4
