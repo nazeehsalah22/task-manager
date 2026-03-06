@@ -1,13 +1,18 @@
 <div class="app-root-container">
   <mat-toolbar color="primary" class="app-toolbar">
-    <div class="logo">
-      <div class="icon">
-        <img src="./icons/nav_icon.png" alt="Logo">
+    <div class="toolbar-left-side">
+      <button mat-icon-button (click)="toggleSidenav()" class="hamburger-btn">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <div class="logo">
+        <div class="icon">
+          <img src="./icons/nav_icon.png" alt="Logo">
+        </div>
+        <span>Task Manager</span>
       </div>
-      <span>Task Manager</span>
     </div>
 
-    <mat-form-field appearance="outline" class="global-search-input">
+    <mat-form-field appearance="outline" class="global-search-input" [class.hidden-mobile]="isMobile()">
       <mat-icon matPrefix>search</mat-icon>
       <input matInput placeholder="Search tasks..." [ngModel]="searchService.searchTerm()"
         (ngModelChange)="searchService.searchTerm.set($event)">
@@ -27,7 +32,11 @@
   </mat-toolbar>
 
   <mat-sidenav-container class="app-sidenav-container">
-    <mat-sidenav mode="side" opened class="app-sidebar">
+    <mat-sidenav 
+      [mode]="isMobile() ? 'over' : 'side'" 
+      [opened]="sidenavOpen()" 
+      (closedStart)="sidenavOpen.set(false)"
+      class="app-sidebar">
       <app-sidebar></app-sidebar>
     </mat-sidenav>
     <mat-sidenav-content class="app-main-content">

@@ -42,4 +42,10 @@
   position: sticky;
   top: 16px;
   height: calc(100vh - 124px);
+
+  @media (max-width: 1400px) {
+    position: static;
+    height: auto;
+    margin-top: 16px;
+  }
 }
